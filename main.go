@@ -2,22 +2,31 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
+	"k8s.io/client-go/util/homedir"
 	"os"
 )
 
 func main() {
-	//kubeconfig := flag.String("kubeconfig", "", "absolute path to the kubeconfig file")
 	var restConfig *rest.Config
 	var err error
+	var home string
+	var kubeconfig string
 
-	restConfig, err = clientcmd.BuildConfigFromFlags("", "")
+	if home = homedir.HomeDir(); home != "" {
+		home = home + "/.kube/config"
+	}
 
+	flag.StringVar(&kubeconfig, "kubeconfig", home, "Path to kubeconfig file")
+	flag.Parse()
+
+	restConfig, err = clientcmd.BuildConfigFromFlags("", kubeconfig)
 	clientset, err := kubernetes.NewForConfig(restConfig)
 	if err != nil {
 		panic(err.Error())
