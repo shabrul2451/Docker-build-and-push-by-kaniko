@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: kaniko
+spec:
+  containers:
+  - name: kaniko
+    image: gcr.io/kaniko-project/executor:latest
+    args:
+    - "--context=git://github.com/username/repository.git#develop"  # Use the branch you want
+    - "--dockerfile=Dockerfile"  # Specify the correct path to your Dockerfile
+    - "--destination=registry-username/kaniko-test:v2"
+    env:
+    - name: GIT_USERNAME
+      value: <user-name>
+    - name: GIT_PASSWORD
+      value: <git-api-token>
+    volumeMounts:
+    - name: kaniko-secret
+      mountPath: /kaniko/.docker
+  restartPolicy: Never
+  volumes:
+  - name: kaniko-secret
+    secret:
+      secretName: dockercred
+      items:
+      - key: .dockerconfigjson
+        path: config.json
+
